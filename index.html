@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+    <meta name="description" content="MULTI CANCHA - Complejo deportivo. Reserva canchas de fútbol, futsal, pádel, básquet, tenis y vóley en La Paz.">
+    <title>MULTI CANCHA | Complejo Deportivo</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0f14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MultiCancha">
+    <meta name="application-name" content="MultiCancha">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+    <link rel="icon" type="image/png" href="img/icon-192.png">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome (solo iconos de interfaz, no fotos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+/* ===== LAYOUT: CSS GRID del catálogo (Mobile-First) ===== */
+.catalogo-grid { display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%; margin: 0 auto; }
+@media (min-width: 768px)  { .catalogo-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; } }
+@media (min-width: 1024px) { .catalogo-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; } }
+
+/* ==========================================================================
+   HOJA DE ESTILOS DE COMPONENTES: TARJETA DE CANCHA (ENCAPSULAMIENTO)
+   Materia: Diseño Web II (SIS-0141) - Guía Práctica Parte 1
+   Docente: Ing. Miguel Angel Cruz Ramos
+   ========================================================================== */
+
+/* COMPONENTE REUTILIZABLE:
+   Define la estructura visual y modular de cada tarjeta de reserva/cancha (.card-item).
+   Permite agregar infinitas canchas de forma dinámica sin modificar el HTML base. */
+
+/* ENCAPSULAMIENTO:
+   Todos los estilos pertenecen exclusivamente al componente usando la convención BEM
+   (.card-item__elemento). Se evita modificar etiquetas globales como <h3>, <p> o <button>
+   para prevenir fugas de estilo y colisiones con el resto de la aplicación. */
+
+.card-item {
+    position: relative;
+    background: var(--bg-card, #121a21);
+    border: 1px solid var(--border-color, #2a3744);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    width: 100%;
+}
+
+.card-item:hover {
+    border-color: var(--neon, #10b981);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* ENCAPSULAMIENTO:
+   Contenedor de medios e imagen superior de la tarjeta. */
+.card-item__media {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    overflow: hidden;
+    background: #1a2530;
+}
+
+.card-item__imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.card-item:hover .card-item__imagen {
+    transform: scale(1.05);
+}
+
+/* ENCAPSULAMIENTO:
+   Distintivo del tipo de superficie o disciplina. */
+.card-item__tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--neon, #10b981);
+    color: #000000;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+}
+
+/* ENCAPSULAMIENTO:
+   Indicador de estado del componente (Disponible / Seleccionado Simulación). */
+.card-item__estado {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(10, 15, 20, 0.85);
+    backdrop-filter: blur(4px);
+    color: #e2e8f0;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+/* FLEXBOX:
+   Alineación unidimensional del cuerpo de la tarjeta (.card-cuerpo y .card-item__cuerpo).
+   Se utiliza flex-direction: column y justify-content: space-between para distribuir
+   el contenido verticalmente sin requerir márgenes rígidos. */
+.card-cuerpo,
+.card-item__cuerpo {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 16px;
+    flex-grow: 1;
+}
+
+/* ENCAPSULAMIENTO:
+   Tipografía y elementos de contenido del encabezado de la tarjeta. */
+.card-item__header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-item__titulo {
+    font-family: 'Teko', sans-serif;
+    font-size: 1.45rem;
+    line-height: 1.15;
+    margin: 0;
+    color: var(--text-light, #f8fafc);
+    letter-spacing: 0.5px;
+}
+
+.card-item__subtitulo {
+    font-size: 0.82rem;
+    color: var(--text-muted, #94a3b8);
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* FLEXBOX:
+   Alineación de precios y botones en el pie de la tarjeta.
+   Distribuye el costo a la izquierda y las acciones interactivas a la derecha. */
+.card-item__pie {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--border-color, #2a3744);
+    padding-top: 14px;
+    margin-top: auto;
+}
+
+.card-item__precio-box {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.card-item__precio {
+    color: var(--neon, #10b981);
+    font-weight: 800;
+    font-size: 1.3rem;
+    font-family: 'Teko', sans-serif;
+    line-height: 1;
+}
+
+.card-item__precio-unidad {
+    color: var(--text-muted, #94a3b8);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* FLEXBOX:
+   Agrupación horizontal de los botones de acción dentro de la tarjeta. */
+.card-item__acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+/* BOTONES DE LA TARJETA (MOBILE-FIRST):
+   Se garantiza área táctil mínima de 44px (btn-tactil) para usabilidad táctil. */
+.card-item__btn-simular {
+    flex: 1;
+    background: transparent;
+    border: 1px dashed var(--neon, #10b981);
+    color: var(--neon, #10b981);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 8px 10px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-item__btn-simular:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-style: solid;
+}
+
+.card-item__btn-reservar {
+    flex: 1;
+    background: var(--neon, #10b981);
+    color: #000000;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 8px 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-item__btn-reservar:hover {
+    background: #059669;
+    color: #ffffff;
+}
+
+/* SIMULACIÓN:
+   Estado activo aplicado exclusivamente a la tarjeta seleccionada mediante JavaScript (.card-item--activo).
+   Demuestra encapsulamiento e independencia de estado sin afectar a las otras tarjetas. */
+.card-item--activo {
+    border-color: var(--neon, #10b981) !important;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.45) !important;
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-card, #121a21) 100%);
+}
+
+.card-item--activo .card-item__estado {
+    background: var(--neon, #10b981);
+    color: #000000;
+    font-weight: 800;
+    border-color: var(--neon, #10b981);
+}
+
+.card-item--activo .card-item__btn-simular {
+    background: var(--neon, #10b981);
+    color: #000000;
+    border-style: solid;
+}
+
+/* COMPATIBILIDAD CON TEMA CLARO */
+body.modo-claro .card-item {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+body.modo-claro .card-item__titulo {
+    color: #0f172a !important;
+}
+
+body.modo-claro .card-item__subtitulo {
+    color: #64748b !important;
+}
+
+body.modo-claro .card-item__pie {
+    border-color: #e2e8f0;
+}
+
+body.modo-claro .card-item--activo {
+    background: #f0fdf4 !important;
+    border-color: var(--neon, #10b981) !important;
+}
+
+/* ==========================================================================
+   SISTEMA DE DISEÑO MULTI CANCHA - ESTILOS GLOBALES Y TEMAS
+   Materia: Diseño Web II (SIS-0141) - Guías Prácticas 1 y 2
+   Docente: Ing. Miguel Angel Cruz Ramos
+   ========================================================================== */
+
+/* MOBILE-FIRST:
+   Definición de variables CSS globales, paleta de colores y reseteo base.
+   Todo el diseño toma como referencia primordial pantallas móviles táctiles. */
+:root {
+    --bg-dark: #0a0f14;
+    --bg-card: #121a21;
+    --neon: #10b981;
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #2a3744;
+    --header-h: 62px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    min-height: 100dvh;
+    background-color: var(--bg-dark);
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-light);
+    transition: background-color 0.3s, color 0.3s;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.no-scroll { overflow: hidden; height: 100dvh; }
+
+body.modo-claro { background-color: #f1f5f9; color: #0f172a; }
+body.modo-claro .stadium-header,
+body.modo-claro .sidebar-menu,
+body.modo-claro .panel-deporte { background: #ffffff; border-color: #e2e8f0; }
+body.modo-claro h1, body.modo-claro h2, body.modo-claro h3,
+body.modo-claro h4, body.modo-claro h5, body.modo-claro h6,
+body.modo-claro p, body.modo-claro span:not(.text-neon):not(.badge):not(.tag),
+body.modo-claro small, body.modo-claro strong { color: #0f172a !important; }
+body.modo-claro .text-muted { color: #64748b !important; }
+body.modo-claro .stadium-card,
+body.modo-claro .sport-box,
+body.modo-claro .calendar-wrapper,
+body.modo-claro .demo-toolbar { background: #ffffff; border-color: #e2e8f0; }
+body.modo-claro .nav-link-sidebar { color: #64748b; }
+body.modo-claro .nav-link-sidebar:hover,
+body.modo-claro .nav-link-sidebar.active { color: var(--neon); }
+body.modo-claro .modal-content { background: #ffffff !important; color: #0f172a !important; }
+body.modo-claro .form-control,
+body.modo-claro .form-select {
+    background: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important;
+}
+body.modo-claro .bg-dark { background: #f8fafc !important; }
+body.modo-claro .btn-outline-light { border-color: #0f172a; color: #0f172a; }
+body.modo-claro .btn-outline-light:hover { background: #0f172a; color: #fff; }
+body.modo-claro .cal-box { background: #f1f5f9; color: #0f172a; }
+body.modo-claro .hero-stadium {
+    background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.6) 100%),
+                url('img/hero.jpg') center/cover no-repeat;
+}
+body.modo-claro .hero-stadium h1,
+body.modo-claro .hero-stadium p { color: #0f172a !important; }
+/* Ajuste modo claro para checks y resumen */
+body.modo-claro .form-check-label { color: #0f172a !important; }
+body.modo-claro #resumenPago { background: #f1f5f9 !important; border-color: #cbd5e1 !important; }
+body.modo-claro #resumenPago span { color: #0f172a !important; }
+body.modo-claro #resumenPago #precioTotal { color: var(--neon) !important; }
+
+/* FLEXBOX:
+   Barra de encabezado superior (Header). Alineación unidimensional horizontal
+   distribuyendo el botón de menú, logotipo y controles de estado/tema. */
+.stadium-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--header-h);
+    display: flex; align-items: center;
+    background: rgba(10, 15, 20, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0 10px;
+    border-bottom: 1px solid var(--border-color);
+    padding-top: env(safe-area-inset-top);
+}
+body.modo-claro .stadium-header { background: rgba(255,255,255,0.95); }
+
+.logo-shield {
+    width: 35px; height: 35px; background: var(--neon); color: #000;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    flex-shrink: 0;
+}
+.logo-text { font-family: 'Teko', sans-serif; font-size: 1.6rem; line-height: 1; }
+
+.sidebar-menu {
+    position: fixed; top: 0; left: -320px; width: 300px; max-width: 85vw;
+    height: 100dvh;
+    background: var(--bg-card); z-index: 1200;
+    transition: left 0.3s ease-in-out;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.sidebar-menu.show { left: 0; }
+.nav-link-sidebar {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--text-muted); text-decoration: none; font-weight: 600;
+    padding: 12px 15px; transition: 0.2s; border-left: 3px solid transparent; min-height: 44px;
+}
+.nav-link-sidebar:hover, .nav-link-sidebar.active {
+    color: var(--neon); background: rgba(16,185,129,0.05); border-left-color: var(--neon);
+}
+.nav-link-sidebar i { font-size: 1.2rem; width: 24px; text-align: center; }
+
+.panel-deporte {
+    position: fixed; top: 0; right: -380px; width: 350px; max-width: 90vw;
+    height: 100dvh; background: var(--bg-card); z-index: 1200;
+    transition: right 0.3s ease-in-out; border-left: 1px solid var(--border-color);
+    overflow-y: auto; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+}
+.panel-deporte.show { right: 0; }
+#deporteIcono i { font-size: 4rem; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1100; display: none; }
+
+.app-seccion { display: none; animation: fadeIn 0.3s ease-out; }
+.app-seccion.activa { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.main-content {
+    padding: calc(var(--header-h) + 20px + env(safe-area-inset-top)) 14px calc(50px + env(safe-area-inset-bottom)) 14px;
+}
+@media (min-width: 768px) { .main-content { padding-left: 24px; padding-right: 24px; } }
+
+.section-title {
+    font-family: 'Teko', sans-serif; font-size: 2rem; color: white;
+    border-left: 5px solid var(--neon); padding-left: 12px; display: inline-block; line-height: 1;
+}
+@media (min-width: 768px) { .section-title { font-size: 2.5rem; } }
+body.modo-claro .section-title { color: #0f172a; }
+
+.hero-stadium {
+    background: linear-gradient(90deg, rgba(10,15,20,0.95) 0%, rgba(10,15,20,0.6) 100%), url('img/hero.jpg') center/cover no-repeat, #121a21;
+    border-left: 5px solid var(--neon); min-height: 260px;
+}
+.hero-title { font-family: 'Teko', sans-serif; line-height: 0.95; }
+.max-w-600 { max-width: 600px; }
+
+.sport-box, .stadium-card, .calendar-wrapper { background: var(--bg-card); border: 1px solid var(--border-color); transition: 0.3s; cursor: pointer; }
+.sport-box:hover { border-color: var(--neon); transform: translateY(-3px); }
+.stadium-card { cursor: default; }
+.stadium-card:hover { border-color: var(--neon); }
+.card-title { font-family: 'Teko', sans-serif; font-size: 1.35rem; line-height: 1.1; }
+
+.img-wrapper { position: relative; height: 180px; overflow: hidden; background: #1a2530; }
+.img-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tag { position: absolute; top: 10px; right: 10px; background: var(--neon); color: #000; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+
+.reserva-img { height: 240px; object-fit: cover; }
+.modal-img { height: 160px; object-fit: cover; }
+
+/* CSS GRID:
+   Estructura bidimensional del calendario mensual de eventos deportivos.
+   Organiza la cabecera y los días en una cuadrícula fija de 7 columnas proporcionales (repeat(7, 1fr)). */
+.calendar-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; color: var(--text-muted); font-size: 0.7rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-box { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid transparent; font-weight: 600; font-size: 0.85rem; position: relative; }
+.event-day { border-color: var(--neon); color: var(--neon); }
+.discount-day { border-color: #f59e0b; color: #f59e0b; }
+.event-dot, .discount-dot { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 4px; }
+.event-dot { background: var(--neon); }
+.discount-dot { background: #f59e0b; }
+
+.btn-neon { background: var(--neon); color: #000; border: none; font-weight: 800; }
+.btn-neon:hover { background: #059669; color: #fff; }
+.btn-outline-neon { border: 1px solid var(--neon); color: var(--neon); background: transparent; font-weight: 700; }
+.btn-outline-neon:hover { background: var(--neon); color: #000; }
+.text-neon { color: var(--neon) !important; }
+.bg-neon { background-color: var(--neon) !important; }
+.btn-tactil { min-height: 44px; min-width: 44px; }
+
+.toast-custom {
+    position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card); padding: 12px 20px; border-left: 4px solid var(--neon);
+    display: flex; align-items: center; opacity: 0; pointer-events: none; transition: 0.3s;
+    z-index: 2000; max-width: calc(100vw - 30px); width: max-content;
+}
+.toast-custom.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 575px) {
+    .hero-title { font-size: 2.4rem; }
+    .btn-neon.btn-lg { font-size: 0.95rem; padding: 12px 18px; }
+    .section-title { font-size: 1.8rem; }
+    .img-wrapper { height: 160px; }
+    .cal-box { font-size: 0.75rem; }
+}
+
+/* Estilos extra para el formulario */
+.form-check-input:checked {
+    background-color: var(--neon);
+    border-color: var(--neon);
+}
+
+/* ==========================================================================
+   PWA RESPONSIVE: CELULAR VERTICAL Y HORIZONTAL (poco scroll, nada diminuto)
+   ========================================================================== */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overscroll-behavior-y: contain; }
+.stadium-header {
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+}
+
+/* ---------- CELULAR VERTICAL / PANTALLAS ANGOSTAS (< 768px) ----------
+   Tarjetas HORIZONTALES (foto a la izquierda, datos a la derecha):
+   cada cancha ocupa ~130px en vez de ~400px => mucho menos scroll. */
+@media (max-width: 767.98px) {
+    .main-content {
+        padding: calc(var(--header-h) + 12px + env(safe-area-inset-top))
+                 max(12px, env(safe-area-inset-right))
+                 calc(24px + env(safe-area-inset-bottom))
+                 max(12px, env(safe-area-inset-left));
+    }
+    .catalogo-grid { gap: 12px; }
+    .card-item { flex-direction: row; min-height: 132px; }
+    .card-item:hover { transform: none; box-shadow: none; }
+    .card-item:hover .card-item__imagen { transform: none; }
+    .card-item__media { flex: 0 0 38%; height: auto; min-height: 132px; }
+    .card-item__imagen { position: absolute; inset: 0; }
+    .card-item__tag { top: 6px; left: 6px; right: auto; font-size: 0.62rem; padding: 2px 6px; }
+    .card-item__estado { display: none; }
+    .card-cuerpo, .card-item__cuerpo { padding: 10px 12px; gap: 8px; min-width: 0; }
+    .card-item__titulo { font-size: 1.3rem; }
+    .card-item__subtitulo { font-size: 0.72rem; }
+    .card-item__pie { flex-direction: row; align-items: center; justify-content: space-between; border-top: none; padding-top: 0; gap: 8px; }
+    .card-item__acciones { width: auto; }
+    .card-item__btn-reservar { flex: 0 0 auto; min-height: 44px; padding: 8px 14px; font-size: 0.85rem; }
+    /* El botón "Simular" no aparece en móviles */
+    .btn-simular, .card-item__btn-simular { display: none !important; }
+
+    .hero-stadium { min-height: 0; padding: 18px 16px !important; margin-bottom: 16px !important; }
+    .hero-title { font-size: 2.1rem; }
+    .hero-stadium p { margin-top: 8px !important; font-size: 0.95rem; }
+    .hero-stadium .mt-4 { margin-top: 12px !important; }
+    .section-title { font-size: 1.7rem; margin-bottom: 12px !important; }
+    #gridDisciplinas { margin-bottom: 18px !important; }
+    .sport-box { padding: 12px 6px !important; }
+    .sport-box h5 { font-size: 0.9rem; }
+    .sport-box i { font-size: 1.6rem !important; margin-bottom: 4px !important; }
+
+    /* Filtros en una sola fila deslizable */
+    #botonesFiltro { flex-wrap: nowrap !important; overflow-x: auto; justify-content: flex-start !important;
+                     padding-bottom: 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    #botonesFiltro::-webkit-scrollbar { display: none; }
+    #botonesFiltro .btn { flex: 0 0 auto; white-space: nowrap; }
+
+    .modal-img { height: 120px; }
+    .reserva-img { height: 190px; }
+}
+
+/* ---------- CELULAR HORIZONTAL (poca altura) ---------- */
+@media (orientation: landscape) and (max-height: 520px) {
+    :root { --header-h: 52px; }
+    .stadium-header .btn-tactil { min-height: 38px; min-width: 38px; padding: 4px 10px; }
+    .main-content {
+        padding: calc(var(--header-h) + 10px + env(safe-area-inset-top))
+                 max(20px, env(safe-area-inset-right))
+                 calc(16px + env(safe-area-inset-bottom))
+                 max(20px, env(safe-area-inset-left));
+    }
+    .hero-stadium { min-height: 0; padding: 14px 20px !important; margin-bottom: 14px !important; }
+    .hero-title { font-size: 2rem; }
+    .hero-stadium p { margin-top: 6px !important; font-size: 0.9rem; }
+    .hero-stadium .mt-4 { margin-top: 10px !important; }
+    .section-title { font-size: 1.6rem; margin-bottom: 10px !important; }
+    #gridDisciplinas { margin-bottom: 16px !important; }
+    .sport-box { padding: 10px 6px !important; }
+    .sport-box h5 { font-size: 0.9rem; }
+    .sport-box i { font-size: 1.5rem !important; margin-bottom: 2px !important; }
+
+    /* Calendario bajito en vez de cuadrado gigante */
+    .cal-box { aspect-ratio: auto; height: 34px; }
+
+    /* Menú lateral más compacto */
+    .nav-link-sidebar { min-height: 40px; padding: 8px 15px; }
+    .sidebar-menu .mb-4 { margin-bottom: 12px !important; }
+    .panel-deporte .p-4 { padding: 14px !important; }
+    #deporteIcono i { font-size: 2.5rem; }
+
+    /* Modal de reserva sin foto para ahorrar altura */
+    .modal-dialog { max-width: 640px; }
+    .modal-img { display: none; }
+    .modal-body { padding: 12px 16px; }
+    #resumenPago { padding: 10px !important; margin-bottom: 12px !important; }
+
+    /* Mi reserva: foto a la izquierda, datos a la derecha */
+    #detalleReserva { display: grid; grid-template-columns: 38% 1fr; }
+    #detalleReserva .reserva-img { height: 100%; min-height: 200px; }
+    #reservaNombre { font-size: 1.5rem; }
+    #reservaTimer { font-size: 1.5rem; margin-bottom: 12px !important; }
+}
+
+/* Celular horizontal angosto (< 768px de ancho): 2 columnas de tarjetas */
+@media (max-width: 767.98px) and (orientation: landscape) {
+    .catalogo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Celular horizontal ancho (>= 768px) o tablet bajita: tarjetas verticales compactas */
+@media (min-width: 768px) and (orientation: landscape) and (max-height: 520px) {
+    .catalogo-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+    .card-item:hover { transform: none; }
+    .card-item__media { height: 110px; }
+    .card-cuerpo, .card-item__cuerpo { padding: 10px 12px; gap: 8px; }
+    .card-item__titulo { font-size: 1.2rem; }
+    .card-item__pie { flex-direction: row; align-items: center; justify-content: space-between; border-top: none; padding-top: 0; }
+    .card-item__acciones { width: auto; }
+    .card-item__btn-reservar { flex: 0 0 auto; min-height: 44px; padding: 8px 14px; }
+    .btn-simular, .card-item__btn-simular { display: none !important; }
+}
+</style>
+</head>
+<body class="modo-oscuro">
+
+    <!-- MENÚ LATERAL IZQUIERDO -->
+    <aside id="sidebarMenu" class="sidebar-menu" aria-hidden="true">
+        <div class="sidebar-header p-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="logo-shield"><i class="fas fa-shield-alt"></i></div>
+                <h4 class="logo-text m-0">MULTI<span class="text-neon">CANCHA</span></h4>
+            </div>
+            <button id="btnCerrarMenu" class="btn btn-outline-light rounded-0 btn-sm btn-tactil" aria-label="Cerrar menú">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="p-3">
+            <small class="text-muted fw-bold d-block mb-2">NAVEGACIÓN</small>
+            <ul class="nav flex-column gap-1 mb-4">
+                <li class="nav-item"><a href="#" class="nav-link-sidebar active" data-seccion="inicio"><i class="fas fa-home"></i> Inicio</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-seccion="canchas"><i class="fas fa-futbol"></i> Reservar Cancha</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-seccion="calendario"><i class="fas fa-calendar-alt"></i> Calendario</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-seccion="mis-reservas"><i class="fas fa-ticket-alt"></i> Mi Reserva</a></li>
+            </ul>
+
+            <small class="text-muted fw-bold d-block mb-2">DISCIPLINAS</small>
+            <ul class="nav flex-column gap-1 mb-4">
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="futbol"><i class="fas fa-futbol"></i> Fútbol</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="futsal"><i class="fas fa-futbol"></i> Futsal</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="padel"><i class="fas fa-table-tennis-paddle-ball"></i> Pádel</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="basquet"><i class="fas fa-basketball-ball"></i> Básquet</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="tenis"><i class="fas fa-baseball-ball"></i> Tenis</a></li>
+                <li class="nav-item"><a href="#" class="nav-link-sidebar" data-deporte="voley"><i class="fas fa-volleyball-ball"></i> Vóley</a></li>
+            </ul>
+
+            <div class="mt-3 text-center">
+                <button id="btnHidratar" class="btn btn-outline-success w-100 rounded-0 btn-tactil">
+                    <i class="fas fa-sync-alt me-2"></i> <span id="txtHidratacion">Sincronizar App</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+    <div id="overlay" class="overlay"></div>
+
+    <!-- PANEL DE DETALLE DEL DEPORTE -->
+    <aside id="panelDeporte" class="panel-deporte" aria-hidden="true">
+        <div class="p-4">
+            <button id="btnCerrarDeporte" class="btn btn-outline-light rounded-0 btn-sm mb-3 btn-tactil">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+            <div id="deporteIcono" class="mb-3 text-center text-neon"></div>
+            <h2 id="deporteTitulo" class="fw-bold border-bottom pb-2 mb-3"></h2>
+            <p id="deporteDesc" class="fs-6 mb-4"></p>
+            <button id="btnVerCanchasDeporte" class="btn btn-neon w-100 rounded-0 py-3 fw-bold btn-tactil">
+                Ver Canchas de este Deporte
+            </button>
+        </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="stadium-header">
+        <div class="container-fluid d-flex justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <button id="btnAbrirMenu" class="btn btn-success rounded-0 btn-tactil" aria-label="Abrir menú">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button id="btnHome" class="btn btn-outline-success rounded-0 btn-tactil" title="Volver al inicio" aria-label="Inicio">
+                    <i class="fas fa-home"></i>
+                </button>
+                <h1 class="logo-text m-0 d-none d-md-block">MULTI<span class="text-neon">CANCHA</span></h1>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span id="estadoRed" class="badge bg-success border border-success px-2 py-2 rounded-0">EN LÍNEA</span>
+                <button id="themeBtn" class="btn btn-outline-light rounded-0 btn-tactil" aria-label="Cambiar tema">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+
+        <!-- VISTA 1: INICIO -->
+        <section id="sec-inicio" class="app-seccion activa">
+            <div class="hero-stadium p-4 p-md-5 mb-4 mb-md-5">
+                <h1 class="display-4 fw-bold text-white m-0 hero-title">
+                    JUEGA EN LA MEJOR<br><span class="text-neon">CANCHA DE LA PAZ</span>
+                </h1>
+                <p class="text-light mt-3 fs-6 fs-md-5 max-w-600">
+                    Fútbol, Futsal, Pádel y más. Reserva fácil, juega rápido. Tu próximo partido comienza aquí.
+                </p>
+                <div class="mt-4">
+                    <button class="btn btn-neon btn-lg rounded-0 px-4 fw-bold btn-tactil" data-filtro="todos">
+                        VER TODAS LAS CANCHAS
+                    </button>
+                </div>
+            </div>
+
+            <h3 class="section-title mb-4 text-center">NUESTRAS DISCIPLINAS</h3>
+            <div class="row g-3 mb-5 justify-content-center" id="gridDisciplinas"></div>
+
+            <h3 class="section-title mb-4 text-center">IR A RESERVAR</h3>
+            <div class="d-flex flex-wrap gap-2 mb-4 justify-content-center" id="botonesFiltro"></div>
+        </section>
+
+        <!-- VISTA 2: CANCHAS (MODULAR - CSS GRID Y SIMULACIÓN) -->
+        <section id="sec-canchas" class="app-seccion">
+            <h2 class="section-title mb-4">CATÁLOGO DE CANCHAS</h2>
+
+            <!-- CSS GRID: Contenedor bidimensional del catálogo (.catalogo-grid) -->
+            <div class="catalogo-grid" id="contenedorCanchas"></div>
+        </section>
+
+        <!-- VISTA 3: CALENDARIO -->
+        <section id="sec-calendario" class="app-seccion">
+            <h2 class="section-title mb-4">CALENDARIO DE EVENTOS</h2>
+            <div class="row g-3">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="calendar-wrapper p-3 p-md-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="fw-bold m-0">NOVIEMBRE 2026</h4>
+                        </div>
+                        <div class="calendar-grid-header mb-2">
+                            <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="stadium-card p-4 h-100">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3">PRÓXIMOS EVENTOS</h5>
+                        <div class="mb-3">
+                            <span class="badge bg-neon rounded-0 mb-1">15 NOV</span>
+                            <h6 class="fw-bold m-0">Copa MultiCancha</h6>
+                        </div>
+                        <div class="mb-3">
+                            <span class="badge bg-warning text-dark rounded-0 mb-1">20 NOV</span>
+                            <h6 class="fw-bold m-0">Descuento 2x1 Pádel</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA 4: MI RESERVA -->
+        <section id="sec-mis-reservas" class="app-seccion">
+            <h2 class="section-title mb-4">MI RESERVA</h2>
+            <div id="vacioReserva" class="text-center py-5 stadium-card">
+                <i class="fas fa-ticket-alt fs-1 text-muted mb-3"></i>
+                <h4 class="fw-bold">No tienes reservas activas</h4>
+                <p class="text-muted">Selecciona una cancha para reservar.</p>
+            </div>
+            <div id="detalleReserva" class="stadium-card" style="display:none;">
+                <img id="reservaFoto" src="" alt="Cancha reservada" class="w-100 reserva-img">
+                <div class="p-3 p-md-4 bg-dark">
+                    <h2 id="reservaNombre" class="text-neon fw-bold"></h2>
+                    <p class="mb-1">Cliente: <span id="reservaCliente"></span></p>
+                    <p class="mb-1">Fecha: <span id="reservaFecha"></span></p>
+                    <p class="mb-3">Extras: <span id="reservaExtras"></span></p>
+                    <h3 id="reservaTimer" class="text-warning font-monospace mb-4">00:00:00</h3>
+                    <button id="btnCancelarReserva" class="btn btn-outline-danger rounded-0 w-100 btn-tactil">CANCELAR RESERVA</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL DE RESERVA (MEJORADO) -->
+    <div class="modal fade" id="modalReserva" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 bg-dark rounded-0">
+                <div class="modal-header border-bottom rounded-0">
+                    <h5 class="modal-title fw-bold">CONFIRMAR RESERVA</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalImgCancha" src="" alt="Cancha" class="w-100 mb-3 modal-img">
+                    <h4 id="modalNombreCancha" class="text-neon fw-bold mb-3"></h4>
+                    
+                    <form id="formReserva" novalidate>
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold" for="inputNombre">NOMBRE COMPLETO</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary rounded-0" id="inputNombre" placeholder="Ej. Juan Pérez" required minlength="3" autocomplete="name">
+                            <small class="text-danger error-msg" id="errorNombre"></small>
+                        </div>
+
+                        <!-- Horarios -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold" for="selectHora">HORA DE INICIO</label>
+                                <select class="form-select bg-dark text-white border-secondary rounded-0" id="selectHora">
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="20:00">20:00</option>
+                                    <option value="21:00">21:00</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold" for="selectHoras">DURACIÓN</label>
+                                <select class="form-select bg-dark text-white border-secondary rounded-0" id="selectHoras">
+                                    <option value="1">1 Hora</option>
+                                    <option value="2">2 Horas</option>
+                                    <option value="3">3 Horas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Jugadores -->
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold" for="selectJugadores">NÚMERO DE JUGADORES</label>
+                            <select class="form-select bg-dark text-white border-secondary rounded-0" id="selectJugadores">
+                                <option value="10">10 personas (5v5)</option>
+                                <option value="14">14 personas (7v7)</option>
+                                <option value="22">22 personas (11v11)</option>
+                                <option value="4">4 personas (2v2)</option>
+                                <option value="2">2 personas (1v1)</option>
+                            </select>
+                        </div>
+
+                        <!-- Extras -->
+                        <div class="mb-4">
+                            <label class="text-muted small fw-bold d-block mb-2">¿NECESITAS ALGO MÁS?</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="extraBalon" data-precio="15" data-nombre="Alquiler de Balón/Pelota">
+                                <label class="form-check-label text-light" for="extraBalon">
+                                    <i class="fas fa-futbol text-neon me-1"></i> Alquilar balón/pelota <span class="text-muted small">(+ Bs. 15)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2" id="boxChalecos">
+                                <input class="form-check-input" type="checkbox" id="extraChalecos" data-precio="10" data-nombre="Alquiler de Chalecos">
+                                <label class="form-check-label text-light" for="extraChalecos">
+                                    <i class="fas fa-tshirt text-neon me-1"></i> Alquilar chalecos <span class="text-muted small">(+ Bs. 10)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="extraArbitro" data-precio="40" data-nombre="Árbitro Profesional">
+                                <label class="form-check-label text-light" for="extraArbitro">
+                                    <i class="fas fa-whistle text-neon me-1"></i> Árbitro profesional <span class="text-muted small">(+ Bs. 40)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de Pago -->
+                        <div class="p-3 mb-4 border border-secondary rounded-0 bg-dark" id="resumenPago">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted small">Cancha (1 hr)</span>
+                                <span id="precioCancha" class="text-light fw-bold">Bs. 0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted small">Extras</span>
+                                <span id="precioExtras" class="text-light fw-bold">Bs. 0</span>
+                            </div>
+                            <hr class="border-secondary my-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-white fw-bold fs-5">TOTAL</span>
+                                <span id="precioTotal" class="text-neon fw-bold fs-5">Bs. 0</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-neon w-100 rounded-0 py-3 fw-bold btn-tactil">PAGAR Y RESERVAR</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastBox" class="toast-custom shadow-lg" role="status" aria-live="polite">
+        <i id="toastIcon" class="fas fa-check-circle text-neon fs-4"></i>
+        <span id="toastMsg" class="text-white fw-bold ms-2">Reserva confirmada</span>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+/* ==========================================================================
+   LÓGICA DE COMPONENTES: TARJETA DE CANCHA (ENCAPSULAMIENTO Y SIMULACIÓN)
+   Materia: Diseño Web II (SIS-0141) - Guía Práctica Parte 1
+   Docente: Ing. Miguel Angel Cruz Ramos
+   ========================================================================== */
+
+/* COMPONENTE REUTILIZABLE:
+   Función generadora que desacopla la fuente de datos (Array de objetos) de la
+   presentación HTML. Retorna la estructura estandarizada de cada tarjeta,
+   permitiendo inyectar nuevas canchas o elementos sin reescribir el HTML base. */
+function crearTarjetaComponente(cancha) {
+    const fallback = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="800" height="500">
+          <rect width="100%" height="100%" fill="#1a2530"/>
+          <text x="50%" y="50%" fill="#10b981" font-family="Arial" font-size="28" text-anchor="middle" dominant-baseline="middle">Imagen no disponible</text>
+        </svg>`);
+
+    return `
+        <article class="card-item" data-id="${cancha.id}" data-deporte="${cancha.deporte}">
+            <!-- Encapsulamiento de medios -->
+            <div class="card-item__media">
+                <img class="card-item__imagen" 
+                     src="${cancha.img}" 
+                     alt="${cancha.nombre}" 
+                     loading="lazy" 
+                     decoding="async" 
+                     onerror="this.onerror=null;this.src='${fallback}';">
+                <span class="card-item__tag">${cancha.tipo}</span>
+                <span class="card-item__estado" id="estado-${cancha.id}">
+                    <i class="fas fa-circle text-success me-1"></i>Disponible
+                </span>
+            </div>
+
+            <!-- FLEXBOX: Cuerpo de la tarjeta con alineación unidimensional vertical -->
+            <div class="card-cuerpo card-item__cuerpo">
+                <header class="card-item__header">
+                    <h3 class="card-item__titulo">${cancha.nombre}</h3>
+                    <p class="card-item__subtitulo">${cancha.deporte.toUpperCase()} • ${cancha.tipo}</p>
+                </header>
+
+                <!-- FLEXBOX: Distribución de precio y acciones en el pie -->
+                <footer class="card-item__pie">
+                    <div class="card-item__precio-box">
+                        <span class="card-item__precio">Bs. ${cancha.precio}</span>
+                        <small class="card-item__precio-unidad">/hr</small>
+                    </div>
+                    <div class="card-item__acciones">
+                        <!-- SIMULACIÓN ACADÉMICA: Botón independiente para verificar reactividad -->
+                        <button type="button" 
+                                class="btn-simular card-item__btn-simular btn-tactil" 
+                                title="Simular selección individual en esta tarjeta" 
+                                data-id="${cancha.id}">
+                            <i class="fas fa-hand-pointer me-1"></i>Simular
+                        </button>
+
+                        <!-- RESERVA REAL: Botón funcional que activa el flujo de modal y pago -->
+                        <button type="button" 
+                                class="btn btn-neon rounded-0 btn-sm btn-reservar btn-tactil card-item__btn-reservar" 
+                                data-nombre="${cancha.nombre}" 
+                                data-foto="${cancha.img}" 
+                                data-precio="${cancha.precio}" 
+                                data-deporte="${cancha.deporte}">
+                            RESERVAR
+                        </button>
+                    </div>
+                </footer>
+            </div>
+        </article>
+    `;
+}
+
+/* SIMULACIÓN:
+   Lógica encapsulada mediante delegación de eventos en el documento (Guía Práctica 1).
+   Garantiza que al presionar el botón de simulación (.btn-simular), ÚNICAMENTE se modifique
+   el estado interno de la tarjeta correspondiente (.card-item) sin alterar a sus hermanas
+   ni interferir con el sistema de reservas real. */
+document.addEventListener('click', (e) => {
+    const btnSimular = e.target.closest('.btn-simular');
+    if (!btnSimular) return;
+
+    // ENCAPSULAMIENTO: Se aísla el nodo padre del componente más cercano
+    const tarjeta = btnSimular.closest('.card-item');
+    if (!tarjeta) return;
+
+    const estado = tarjeta.querySelector('.card-item__estado');
+    const activo = tarjeta.classList.toggle('card-item--activo');
+
+    // Modificación exclusiva del estado visual de esta tarjeta
+    if (estado) {
+        estado.innerHTML = activo 
+            ? '<i class="fas fa-check-circle text-dark me-1"></i>Seleccionado (Simulación)' 
+            : '<i class="fas fa-circle text-success me-1"></i>Disponible';
+    }
+
+    // Actualización del botón de la tarjeta actual
+    btnSimular.innerHTML = activo
+        ? '<i class="fas fa-undo me-1"></i>Deseleccionar'
+        : '<i class="fas fa-hand-pointer me-1"></i>Simular';
+
+    // Notificación en pantalla (Toast) diferenciando simulación de reserva real
+    const titulo = tarjeta.querySelector('.card-item__titulo')?.textContent || 'Cancha';
+    if (typeof mostrarToast === 'function') {
+        mostrarToast(
+            activo 
+                ? `[Simulación] ${titulo} seleccionada individualmente (No altera reserva real)` 
+                : `[Simulación] ${titulo} restaurada a disponible`,
+            activo ? 'success' : 'info'
+        );
+    }
+});
+
+
+
+/* =========================================================
+   MULTI CANCHA - PWA
+   ========================================================= */
+
+let deporteActualFiltro = 'todos';
+let reservaTimerInterval = null;
+let segundosRestantes = 0;
+let canchaActual = { nombre: '', foto: '', precioHora: 0, deporte: '' };
+
+const deportesData = {
+    futbol: { titulo: 'FÚTBOL',   icono: '<i class="fas fa-futbol"></i>', desc: 'Césped sintético de última generación para Fútbol 5, 7 y 11. Iluminación LED y vestuarios.' },
+    futsal: { titulo: 'FUTSAL',   icono: '<i class="fas fa-futbol"></i>', desc: 'Canchas techadas con piso de parquet profesional. Ideal para torneos 5v5 sin preocuparte por el clima.' },
+    padel:  { titulo: 'PÁDEL',    icono: '<i class="fas fa-table-tennis-paddle-ball"></i>', desc: 'Canchas techadas con cristal panorámico. Iluminación profesional.' },
+    basquet:{ titulo: 'BÁSQUET',  icono: '<i class="fas fa-basketball-ball"></i>', desc: 'Piso de parquet profesional, aros reglamentarios y graderías. Torneos 3x3 o 5v5.' },
+    tenis:  { titulo: 'TENIS',    icono: '<i class="fas fa-baseball-ball"></i>', desc: 'Canchas de arcilla y superficie dura con mantenimiento diario.' },
+    voley:  { titulo: 'VÓLEY',    icono: '<i class="fas fa-volleyball-ball"></i>', desc: 'Canchas de arena fina para vóley playa y canchas techadas para indoor.' }
+};
+
+const canchasData = [
+    { id:'f1', deporte:'futbol', nombre:'Fútbol 5 - Cancha 1', tipo:'SINTÉTICO', precio:80,  img:'img/futbol1.jpg' },
+    { id:'f2', deporte:'futbol', nombre:'Fútbol 5 - Cancha 2', tipo:'SINTÉTICO', precio:80,  img:'img/futbol2.jpg' },
+    { id:'f3', deporte:'futbol', nombre:'Fútbol 7 - Central',  tipo:'SINTÉTICO', precio:120, img:'img/futbol3.jpg' },
+    { id:'f4', deporte:'futbol', nombre:'Fútbol 11 - Estadio', tipo:'CÉSPED',    precio:200, img:'img/futbol4.jpg' },
+    { id:'f5', deporte:'futbol', nombre:'Fútbol 8 - Norte',    tipo:'SINTÉTICO', precio:150, img:'img/futbol5.jpg' },
+    { id:'fs1', deporte:'futsal', nombre:'Futsal - Parquet 1', tipo:'PARQUET',   precio:90,  img:'img/futsal1.jpg' },
+    { id:'fs2', deporte:'futsal', nombre:'Futsal - Parquet 2', tipo:'PARQUET',   precio:90,  img:'img/futsal2.jpg' },
+    { id:'fs3', deporte:'futsal', nombre:'Futsal - Techada',   tipo:'TECHADA',   precio:100, img:'img/futsal3.jpg' },
+    { id:'fs4', deporte:'futsal', nombre:'Futsal - Central',   tipo:'PARQUET',   precio:110, img:'img/futsal4.jpg' },
+    { id:'fs5', deporte:'futsal', nombre:'Futsal - Sur',       tipo:'SINTÉTICO', precio:80,  img:'img/futsal5.jpg' },
+    { id:'p1', deporte:'padel', nombre:'Pádel - Cristal 1', tipo:'TECHADA',     precio:90,  img:'img/padel1.jpg' },
+    { id:'p2', deporte:'padel', nombre:'Pádel - Cristal 2', tipo:'TECHADA',     precio:90,  img:'img/padel2.jpg' },
+    { id:'p3', deporte:'padel', nombre:'Pádel - Exterior',  tipo:'AIRE LIBRE',  precio:70,  img:'img/padel3.jpg' },
+    { id:'p4', deporte:'padel', nombre:'Pádel - VIP',       tipo:'TECHADA VIP', precio:110, img:'img/padel4.jpg' },
+    { id:'t1', deporte:'tenis', nombre:'Tenis - Arcilla 1', tipo:'ARCILLA', precio:80,  img:'img/tenis1.jpg' },
+    { id:'t2', deporte:'tenis', nombre:'Tenis - Arcilla 2', tipo:'ARCILLA', precio:80,  img:'img/tenis2.jpg' },
+    { id:'t3', deporte:'tenis', nombre:'Tenis - Dura',      tipo:'DURA',    precio:70,  img:'img/tenis3.jpg' },
+    { id:'t4', deporte:'tenis', nombre:'Tenis - Indoor',    tipo:'TECHADA', precio:100, img:'img/tenis4.jpg' },
+    { id:'b1', deporte:'basquet', nombre:'Básquet - Principal', tipo:'PARQUET',      precio:100, img:'img/basquet1.jpg' },
+    { id:'b2', deporte:'basquet', nombre:'Básquet - Exterior',  tipo:'ASFALTO',      precio:50,  img:'img/basquet2.jpg' },
+    { id:'b3', deporte:'basquet', nombre:'Básquet - 3x3',       tipo:'MEDIA CANCHA', precio:60,  img:'img/basquet3.jpg' },
+    { id:'b4', deporte:'basquet', nombre:'Básquet - VIP',       tipo:'TECHADA',      precio:120, img:'img/basquet4.jpg' },
+    { id:'v1', deporte:'voley', nombre:'Vóley - Playa 1', tipo:'ARENA',   precio:60, img:'img/voley1.jpg' },
+    { id:'v2', deporte:'voley', nombre:'Vóley - Playa 2', tipo:'ARENA',   precio:60, img:'img/voley2.jpg' },
+    { id:'v3', deporte:'voley', nombre:'Vóley - Indoor',  tipo:'TECHADA', precio:80, img:'img/voley3.jpg' },
+    { id:'v4', deporte:'voley', nombre:'Vóley - Mixto',   tipo:'TECHADA', precio:70, img:'img/voley4.jpg' }
+];
+
+const FALLBACK_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500">
+  <rect width="100%" height="100%" fill="#1a2530"/>
+  <text x="50%" y="50%" fill="#10b981" font-family="Arial" font-size="28" text-anchor="middle" dominant-baseline="middle">Imagen no disponible</text>
+</svg>`);
+
+function cambiarSeccion(idSeccion, elementoBoton = null) {
+    document.querySelectorAll('.app-seccion').forEach(sec => sec.classList.remove('activa'));
+    const sec = document.getElementById('sec-' + idSeccion);
+    if (sec) sec.classList.add('activa');
+    document.querySelectorAll('.nav-link-sidebar').forEach(nav => nav.classList.remove('active'));
+    if (elementoBoton) elementoBoton.classList.add('active');
+    cerrarPaneles();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (history.replaceState) history.replaceState(null, '', '#' + idSeccion);
+}
+
+function cerrarPaneles() {
+    document.getElementById('sidebarMenu').classList.remove('show');
+    document.getElementById('panelDeporte').classList.remove('show');
+    document.getElementById('overlay').style.display = 'none';
+    document.body.classList.remove('no-scroll');
+}
+
+function abrirMenu() {
+    document.getElementById('sidebarMenu').classList.add('show');
+    document.getElementById('overlay').style.display = 'block';
+    document.body.classList.add('no-scroll');
+}
+
+function verDeporte(deporte) {
+    const data = deportesData[deporte];
+    if (!data) return;
+    document.getElementById('deporteTitulo').textContent = data.titulo;
+    document.getElementById('deporteIcono').innerHTML = data.icono;
+    document.getElementById('deporteDesc').textContent = data.desc;
+    deporteActualFiltro = deporte;
+    document.getElementById('panelDeporte').classList.add('show');
+    document.getElementById('overlay').style.display = 'block';
+    document.body.classList.add('no-scroll');
+}
+
+function filtrarYCambiarSeccion() {
+    cerrarPaneles();
+    cambiarSeccion('canchas');
+    renderizarCanchas(deporteActualFiltro);
+}
+
+function renderizarDisciplinas() {
+    const grid = document.getElementById('gridDisciplinas');
+    const orden = ['futbol','futsal','padel','basquet','tenis','voley'];
+    grid.innerHTML = orden.map(k => `
+        <div class="col-4 col-md-2">
+            <div class="sport-box p-3 text-center" data-deporte="${k}" role="button" tabindex="0">
+                ${deportesData[k].icono.replace('<i ', '<i class="fs-2 text-neon mb-2 d-block" ')}
+                <h5 class="fw-bold m-0">${deportesData[k].titulo}</h5>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderizarBotonesFiltro() {
+    const cont = document.getElementById('botonesFiltro');
+    const orden = ['futbol','futsal','padel','basquet','tenis','voley','todos'];
+    cont.innerHTML = orden.map(k => {
+        const label = k === 'todos' ? 'Todas' : deportesData[k].titulo;
+        const icono = k === 'todos' ? '<i class="fas fa-list"></i>' : deportesData[k].icono;
+        const btnClass = k === 'todos' ? 'btn-neon' : 'btn-outline-neon';
+        return `<button class="btn ${btnClass} rounded-0 btn-tactil" data-filtro="${k}">
+                    ${icono.replace('<i ', '<i class="me-2" ')} ${label}
+                </button>`;
+    }).join('');
+}
+
+/* COMPONENTE REUTILIZABLE:
+   Renderizado del catálogo en la estructura CSS Grid (.catalogo-grid).
+   Utiliza la función modular crearTarjetaComponente() para desacoplar los datos
+   de la presentación HTML y encapsular estilos e interactividad de cada tarjeta. */
+function renderizarCanchas(filtro) {
+    const cont = document.getElementById('contenedorCanchas');
+    const lista = canchasData.filter(c => filtro === 'todos' || c.deporte === filtro);
+    if (!lista.length) {
+        cont.innerHTML = `<div class="w-100 text-center py-5"><p class="text-muted">No hay canchas disponibles para este filtro.</p></div>`;
+        return;
+    }
+    cont.innerHTML = lista.map(c => {
+        if (typeof crearTarjetaComponente === 'function') {
+            return crearTarjetaComponente(c);
+        }
+        return `
+            <article class="card-item" data-id="${c.id}">
+                <div class="card-item__media">
+                    <img class="card-item__imagen" src="${c.img}" alt="${c.nombre}" onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
+                    <span class="card-item__tag">${c.tipo}</span>
+                    <span class="card-item__estado"><i class="fas fa-circle text-success me-1"></i>Disponible</span>
+                </div>
+                <div class="card-cuerpo card-item__cuerpo">
+                    <div class="card-item__header">
+                        <h3 class="card-item__titulo">${c.nombre}</h3>
+                        <p class="card-item__subtitulo">${c.deporte.toUpperCase()} • ${c.tipo}</p>
+                    </div>
+                    <div class="card-item__pie">
+                        <div class="card-item__precio-box">
+                            <span class="card-item__precio">Bs. ${c.precio}</span>
+                            <small class="card-item__precio-unidad">/hr</small>
+                        </div>
+                        <div class="card-item__acciones">
+                            <button type="button" class="btn-simular card-item__btn-simular btn-tactil">Simular</button>
+                            <button type="button" class="btn btn-neon rounded-0 btn-sm btn-reservar btn-tactil card-item__btn-reservar"
+                                    data-nombre="${c.nombre}"
+                                    data-foto="${c.img}"
+                                    data-precio="${c.precio}"
+                                    data-deporte="${c.deporte}">RESERVAR</button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+function filtrarCanchas(deporte) {
+    cambiarSeccion('canchas');
+    renderizarCanchas(deporte);
+}
+
+function renderizarCalendario() {
+    const grid = document.getElementById('calendarGrid');
+    const eventos = { 15: 'event', 20: 'discount' };
+    // Noviembre 2026 empieza en domingo -> con semana Lun-Dom van 6 días del mes anterior (26 al 31 de octubre)
+    let html = '';
+    for (let d = 26; d <= 31; d++) html += `<div class="cal-box text-muted opacity-25">${d}</div>`;
+    for (let i = 1; i <= 30; i++) {
+        const tipo = eventos[i];
+        const cls = tipo === 'event' ? 'event-day' : tipo === 'discount' ? 'discount-day' : '';
+        const dot = tipo === 'event' ? '<span class="event-dot"></span>' : tipo === 'discount' ? '<span class="discount-dot"></span>' : '';
+        html += `<div class="cal-box ${cls}">${i}${dot}</div>`;
+    }
+    grid.innerHTML = html;
+}
+
+function mostrarToast(msg, tipo = 'success') {
+    const icon = document.getElementById('toastIcon');
+    if (tipo === 'success') icon.className = 'fas fa-check-circle text-neon fs-4';
+    else if (tipo === 'warning') icon.className = 'fas fa-exclamation-triangle text-warning fs-4';
+    else icon.className = 'fas fa-info-circle text-info fs-4';
+    document.getElementById('toastMsg').textContent = msg;
+    const box = document.getElementById('toastBox');
+    box.classList.add('show');
+    clearTimeout(box._t);
+    box._t = setTimeout(() => box.classList.remove('show'), 3000);
+}
+
+/* ---------- MODAL Y PRECIOS DINÁMICOS ---------- */
+
+// Actualiza el resumen de pago según las opciones seleccionadas
+function actualizarPrecio() {
+    const horas = parseInt(document.getElementById('selectHoras').value, 10);
+    const precioBase = canchaActual.precioHora;
+    
+    // Calcular cancha
+    const totalCancha = precioBase * horas;
+    document.getElementById('precioCancha').textContent = `Bs. ${totalCancha}`;
+
+    // Calcular extras
+    let totalExtras = 0;
+    document.querySelectorAll('#formReserva .form-check-input:checked').forEach(checkbox => {
+        totalExtras += parseInt(checkbox.dataset.precio, 10);
+    });
+    document.getElementById('precioExtras').textContent = `Bs. ${totalExtras}`;
+
+    // Total
+    document.getElementById('precioTotal').textContent = `Bs. ${totalCancha + totalExtras}`;
+}
+
+function abrirModalReserva(nombre, foto, precio, deporte) {
+    canchaActual = { nombre, foto, precioHora: precio, deporte };
+    
+    document.getElementById('modalNombreCancha').textContent = nombre;
+    const img = document.getElementById('modalImgCancha');
+    img.src = foto;
+    img.onerror = () => { img.onerror = null; img.src = FALLBACK_IMG; };
+    
+    // Reiniciar formulario y opciones
+    document.getElementById('formReserva').reset();
+    document.getElementById('errorNombre').textContent = '';
+    
+    // Adaptar el texto del extra (balón/pelota) según deporte
+    const labelBalon = document.querySelector('label[for="extraBalon"]');
+    if (deporte === 'tenis' || deporte === 'padel' || deporte === 'voley') {
+        labelBalon.innerHTML = '<i class="fas fa-baseball-ball text-neon me-1"></i> Alquilar pelota <span class="text-muted small">(+ Bs. 15)</span>';
+    } else {
+        labelBalon.innerHTML = '<i class="fas fa-futbol text-neon me-1"></i> Alquilar balón <span class="text-muted small">(+ Bs. 15)</span>';
+    }
+
+    // Mostrar/Ocultar chalecos (solo fútbol, futsal, básquet)
+    const boxChalecos = document.getElementById('boxChalecos');
+    if (['futbol', 'futsal', 'basquet'].includes(deporte)) {
+        boxChalecos.style.display = 'block';
+    } else {
+        boxChalecos.style.display = 'none';
+        document.getElementById('extraChalecos').checked = false;
+    }
+
+    // Adaptar opciones de jugadores según deporte
+    const selectJugadores = document.getElementById('selectJugadores');
+    if (deporte === 'tenis' || deporte === 'padel') {
+        selectJugadores.innerHTML = `
+            <option value="2">2 personas (1v1)</option>
+            <option value="4">4 personas (2v2)</option>
+        `;
+    } else if (deporte === 'voley') {
+        selectJugadores.innerHTML = `
+            <option value="6">6 personas (3v3)</option>
+            <option value="12">12 personas (6v6)</option>
+        `;
+    } else {
+        selectJugadores.innerHTML = `
+            <option value="10">10 personas (5v5)</option>
+            <option value="14">14 personas (7v7)</option>
+            <option value="22">22 personas (11v11)</option>
+            <option value="4">4 personas (2v2)</option>
+        `;
+    }
+
+    actualizarPrecio();
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalReserva'));
+    modal.show();
+}
+
+function iniciarTemporizador(segundos, datos) {
+    detenerTemporizador();
+    segundosRestantes = segundos;
+    localStorage.setItem('reservaActiva', JSON.stringify({ ...datos, fin: Date.now() + segundos * 1000 }));
+    actualizarReloj();
+    reservaTimerInterval = setInterval(() => {
+        segundosRestantes--;
+        actualizarReloj();
+        if (segundosRestantes <= 0) {
+            detenerTemporizador();
+            finalizarReserva();
+            mostrarToast('Tu reserva ha finalizado', 'info');
+        }
+    }, 1000);
+}
+
+function detenerTemporizador() {
+    if (reservaTimerInterval) { clearInterval(reservaTimerInterval); reservaTimerInterval = null; }
+}
+
+function actualizarReloj() {
+    const h = Math.floor(segundosRestantes / 3600);
+    const m = Math.floor((segundosRestantes % 3600) / 60);
+    const s = segundosRestantes % 60;
+    document.getElementById('reservaTimer').textContent =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function finalizarReserva() {
+    detenerTemporizador();
+    localStorage.removeItem('reservaActiva');
+    document.getElementById('detalleReserva').style.display = 'none';
+    document.getElementById('vacioReserva').style.display = '';
+}
+
+function restaurarReservaGuardada() {
+    const raw = localStorage.getItem('reservaActiva');
+    if (!raw) return;
+    try {
+        const r = JSON.parse(raw);
+        const restante = Math.max(0, Math.floor((r.fin - Date.now()) / 1000));
+        if (restante <= 0) { localStorage.removeItem('reservaActiva'); return; }
+        document.getElementById('reservaNombre').textContent = r.nombre;
+        document.getElementById('reservaCliente').textContent = r.cliente;
+        document.getElementById('reservaFecha').textContent = r.fecha;
+        document.getElementById('reservaExtras').textContent = r.extras;
+        const img = document.getElementById('reservaFoto');
+        img.src = r.foto;
+        img.onerror = () => { img.onerror = null; img.src = FALLBACK_IMG; };
+        document.getElementById('vacioReserva').style.display = 'none';
+        document.getElementById('detalleReserva').style.display = '';
+        iniciarTemporizador(restante, r);
+    } catch (e) {
+        localStorage.removeItem('reservaActiva');
+    }
+}
+
+/* ---------- INICIALIZACIÓN ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarDisciplinas();
+    renderizarBotonesFiltro();
+    renderizarCanchas('todos');
+    renderizarCalendario();
+
+    document.getElementById('btnAbrirMenu').addEventListener('click', abrirMenu);
+    document.getElementById('btnCerrarMenu').addEventListener('click', cerrarPaneles);
+    document.getElementById('btnCerrarDeporte').addEventListener('click', cerrarPaneles);
+    document.getElementById('overlay').addEventListener('click', cerrarPaneles);
+    document.getElementById('btnHome').addEventListener('click', () => cambiarSeccion('inicio'));
+    document.getElementById('btnVerCanchasDeporte').addEventListener('click', filtrarYCambiarSeccion);
+
+    document.querySelectorAll('.nav-link-sidebar[data-seccion]').forEach(link => {
+        link.addEventListener('click', e => { e.preventDefault(); cambiarSeccion(link.dataset.seccion, link); });
+    });
+    document.querySelectorAll('.nav-link-sidebar[data-deporte]').forEach(link => {
+        link.addEventListener('click', e => { e.preventDefault(); verDeporte(link.dataset.deporte); });
+    });
+
+    document.addEventListener('click', e => {
+        const sport = e.target.closest('.sport-box');
+        if (sport) { verDeporte(sport.dataset.deporte); return; }
+
+        const filtro = e.target.closest('[data-filtro]');
+        if (filtro) { filtrarCanchas(filtro.dataset.filtro); return; }
+
+        const reservar = e.target.closest('.btn-reservar');
+        if (reservar) {
+            abrirModalReserva(
+                reservar.dataset.nombre, 
+                reservar.dataset.foto, 
+                parseInt(reservar.dataset.precio, 10),
+                reservar.dataset.deporte
+            );
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && e.target.classList.contains('sport-box')) { verDeporte(e.target.dataset.deporte); }
+        if (e.key === 'Escape') cerrarPaneles();
+    });
+
+    // Escuchar cambios en el formulario para actualizar precio
+    document.getElementById('selectHoras').addEventListener('change', actualizarPrecio);
+    document.querySelectorAll('#formReserva .form-check-input').forEach(chk => {
+        chk.addEventListener('change', actualizarPrecio);
+    });
+
+    document.getElementById('formReserva').addEventListener('submit', e => {
+        e.preventDefault();
+        const nombreCliente = document.getElementById('inputNombre').value.trim();
+        const err = document.getElementById('errorNombre');
+        if (nombreCliente.length < 3) {
+            err.textContent = 'Ingresa al menos 3 caracteres';
+            return;
+        }
+        err.textContent = '';
+
+        const canchaNombre = document.getElementById('modalNombreCancha').textContent;
+        const canchaFoto = document.getElementById('modalImgCancha').getAttribute('src');
+        const hora = document.getElementById('selectHora').value;
+        const horas = parseInt(document.getElementById('selectHoras').value, 10);
+        const totalPagar = document.getElementById('precioTotal').textContent;
+
+        // Recolectar extras
+        let extrasSeleccionados = [];
+        document.querySelectorAll('#formReserva .form-check-input:checked').forEach(checkbox => {
+            extrasSeleccionados.push(checkbox.dataset.nombre);
+        });
+        const extrasTexto = extrasSeleccionados.length > 0 ? extrasSeleccionados.join(', ') : 'Ninguno';
+
+        bootstrap.Modal.getInstance(document.getElementById('modalReserva')).hide();
+        
+        cambiarSeccion('mis-reservas');
+        document.getElementById('reservaNombre').textContent = canchaNombre;
+        document.getElementById('reservaCliente').textContent = nombreCliente;
+        document.getElementById('reservaFecha').textContent = `Hoy - ${hora}`;
+        document.getElementById('reservaExtras').textContent = `${extrasTexto} (${totalPagar})`;
+        
+        const img = document.getElementById('reservaFoto');
+        img.src = canchaFoto;
+        img.onerror = () => { img.onerror = null; img.src = FALLBACK_IMG; };
+
+        document.getElementById('vacioReserva').style.display = 'none';
+        document.getElementById('detalleReserva').style.display = '';
+
+        iniciarTemporizador(3600 * horas, {
+            nombre: canchaNombre, cliente: nombreCliente,
+            fecha: `Hoy - ${hora}`, foto: canchaFoto,
+            extras: `${extrasTexto} (${totalPagar})`
+        });
+        mostrarToast('Reserva confirmada', 'success');
+    });
+
+    document.getElementById('btnCancelarReserva').addEventListener('click', () => {
+        if (confirm('¿Cancelar reserva?')) {
+            finalizarReserva();
+            mostrarToast('Reserva cancelada', 'warning');
+        }
+    });
+
+    document.getElementById('btnHidratar').addEventListener('click', function() {
+        const txt = document.getElementById('txtHidratacion');
+        const icon = this.querySelector('i');
+        txt.textContent = 'Sincronizando...';
+        icon.classList.add('fa-spin');
+        setTimeout(() => {
+            txt.textContent = '✅ Sincronizado';
+            icon.classList.remove('fa-spin');
+            mostrarToast('Datos sincronizados correctamente', 'success');
+        }, 1000);
+    });
+
+    const modoGuardado = localStorage.getItem('stadiumModoClaro');
+    if (modoGuardado === 'true') {
+        document.body.classList.remove('modo-oscuro');
+        document.body.classList.add('modo-claro');
+        document.getElementById('themeBtn').innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    document.getElementById('themeBtn').addEventListener('click', function() {
+        document.body.classList.toggle('modo-claro');
+        document.body.classList.toggle('modo-oscuro');
+        const esClaro = document.body.classList.contains('modo-claro');
+        this.innerHTML = esClaro ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        localStorage.setItem('stadiumModoClaro', esClaro);
+    });
+
+    const estadoRed = document.getElementById('estadoRed');
+    function actualizarRed() {
+        if (navigator.onLine) {
+            estadoRed.textContent = 'EN LÍNEA';
+            estadoRed.className = 'badge bg-success border border-success px-2 py-2 rounded-0';
+        } else {
+            estadoRed.textContent = 'OFFLINE';
+            estadoRed.className = 'badge bg-warning text-dark border border-warning px-2 py-2 rounded-0';
+        }
+    }
+    window.addEventListener('online', actualizarRed);
+    window.addEventListener('offline', actualizarRed);
+    actualizarRed();
+
+    restaurarReservaGuardada();
+
+    if (location.hash) {
+        const id = location.hash.replace('#', '');
+        if (document.getElementById('sec-' + id)) cambiarSeccion(id);
+    }
+
+    /* PWA: se bloquea el aviso automático de "Instalar" del navegador.
+       La app funciona igual en el navegador y sin pedir nada. */
+    window.addEventListener('beforeinstallprompt', (e) => e.preventDefault());
+
+    if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[PWA SW] Registrado en scope:', reg.scope))
+                .catch(err => console.warn('[PWA SW] Error en registro:', err));
+        });
+    }
+});
+</script>
+</body>
+</html>
