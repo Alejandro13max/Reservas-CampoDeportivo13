@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 03 - Seguridad y Contraste</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background: #0a0f14; color: #f8fafc; transition: 0.3s; font-family: sans-serif; }
+        .card-box { background: #121a21; border: 1px solid #2a3744; padding: 20px; border-radius: 8px; }
+        
+        /* Modo Alto Contraste */
+        body.alto-contraste { background: #000 !important; color: #fff !important; }
+        body.alto-contraste .card-box { background: #111 !important; border: 2px solid #facc15 !important; color: #fff !important; }
+        body.alto-contraste .btn { background: #facc15 !important; color: #000 !important; font-weight: bold; border: 2px solid #fff !important; }
+        body.alto-contraste :focus-visible { outline: 3px solid #facc15 !important; }
+    </style>
+</head>
+<body>
+    <main class="container mt-5">
+        <h1 class="text-success">Fase 03: Seguridad y Alto Contraste</h1>
+        
+        <div class="card-box mt-4">
+            <h3>Prueba de Contraste</h3>
+            <p>Activa el modo de alto contraste para verificar la legibilidad de los textos y bordes.</p>
+            <button id="btnAltoContraste" class="btn btn-light" aria-pressed="false">Alternar Alto Contraste</button>
+        </div>
+        
+        <a href="../index.html" class="btn btn-outline-light mt-4">Volver al Menú</a>
+    </main>
+
+    <script>
+        const btnAC = document.getElementById('btnAltoContraste');
+        btnAC.addEventListener('click', () => {
+            const activo = document.body.classList.toggle('alto-contraste');
+            btnAC.setAttribute('aria-pressed', activo ? 'true' : 'false');
+        });
+    </script>
+</body>
+</html>
